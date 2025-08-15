@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pi Sequence Circle Visualization</title>
+<title>Gordian Knot</title>
 <style>
   body {
 	margin: 0;
@@ -19,15 +19,6 @@
 	background: #111;
 	box-shadow: 0 0 30px rgba(255,255,255,0.1);
   }
-  #legend {
-	position: absolute;
-	right: 20px;
-	top: 20px;
-	background: rgba(0,0,0,0.5);
-	padding: 10px;
-	border-radius: 8px;
-	font-size: 14px;
-  }
 </style>
 </head>
 <body>
@@ -43,7 +34,7 @@ const cy = height / 2;
 // -----------------------------
 // Generate custom sequence
 // -----------------------------
-const n = 666;
+const n = 360;
 let sequence = [3];
 let odd_increment = 0;
 let even_value = 1;
@@ -61,20 +52,19 @@ for (let pos = 1; pos < n; pos++) {
 	}
 }
 
-// Wrap digits to 0-665 (mod 666)
 const sequence_digits = sequence.map(d => d % n);
 
 // Convert to float
 const mypi = sequence_digits.map(d => parseFloat(d));
 
-// Map digits to angles
-const angles = mypi.map(d => 2 * d * d);
+// Map digits to angles for initial circle positions
+const angles = mypi.map((d, i) => 2 * mypi[i] * d / n);
 const r = 300; // Circle radius
 const x = angles.map(a => r * Math.cos(a));
 const y = angles.map(a => r * Math.sin(a));
 
 // -----------------------------
-// Color map (similar to tab20)
+// Color map
 // -----------------------------
 const colors = [
   "#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf",
@@ -100,13 +90,13 @@ function rotatePoints(xArr, yArr, angleRad) {
 }
 
 // -----------------------------
-// Draw multiple rotated copies
+// Draw multiple rotated copies using mypi
 // -----------------------------
-const num_rotations = n;
+const num_rotations = n; // for performance
 
 for (let i = 0; i < num_rotations; i++) {
-	const rotation_deg = mypi[i % mypi.length];
-	const rotation_rad = rotation_deg * mypi / 180;
+	// Use sequence value as rotation in radians
+	const rotation_rad = mypi[i % mypi.length];
 	const rotated = rotatePoints(x, y, rotation_rad);
 
 	for (let j = 0; j < rotated.length - 1; j++) {
