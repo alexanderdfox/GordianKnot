@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pi Sequence Circle Visualization</title>
+<style>
+  body {
+	margin: 0;
+	background: #111;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	color: white;
+	font-family: Arial, sans-serif;
+  }
+  canvas {
+	border: 1px solid #333;
+	background: #111;
+	box-shadow: 0 0 30px rgba(255,255,255,0.1);
+  }
+  #legend {
+	position: absolute;
+	right: 20px;
+	top: 20px;
+	background: rgba(0,0,0,0.5);
+	padding: 10px;
+	border-radius: 8px;
+	font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<canvas id="circleCanvas" width="800" height="800"></canvas>
+<script>
+const canvas = document.getElementById('circleCanvas');
+const ctx = canvas.getContext('2d');
+const width = canvas.width;
+const height = canvas.height;
+const cx = width / 2;
+const cy = height / 2;
+
+// -----------------------------
+// Generate custom sequence
+// -----------------------------
+const n = 666;
+let sequence = [3];
+let odd_increment = 0;
+let even_value = 1;
+
+for (let pos = 1; pos < n; pos++) {
+	if (pos % 2 === 0) {
+		odd_increment += 1;
+		sequence.push(3 + odd_increment);
+	} else {
+		const prev_odd_digit = sequence[sequence.length - 1];
+		sequence.push(even_value);
+		if (prev_odd_digit % 2 === 1) {
+			even_value += 1;
+		}
+	}
+}
+
+// Wrap digits to 0-665 (mod 666)
+const sequence_digits = sequence.map(d => d % n);
+
+// Convert to float
+const mypi = sequence_digits.map(d => parseFloat(d));
+
+// Map digits to angles
+const angles = mypi.map(d => 2 * d * d);
+const r = 300; // Circle radius
+const x = angles.map(a => r * Math.cos(a));
+const y = angles.map(a => r * Math.sin(a));
+
+// -----------------------------
+// Color map (similar to tab20)
+// -----------------------------
+const colors = [
+  "#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf",
+  "#393b79","#637939","#8c6d31","#843c39","#7b4173","#3182bd","#e6550d","#31a354","#756bb1","#636363"
+];
+
+function getColor(value) {
+	const index = Math.floor(value / Math.max(...mypi) * (colors.length - 1));
+	return colors[index];
+}
+
+// -----------------------------
+// Rotate points function
+// -----------------------------
+function rotatePoints(xArr, yArr, angleRad) {
+	return xArr.map((x, i) => {
+		const y = yArr[i];
+		return [
+			x * Math.cos(angleRad) - y * Math.sin(angleRad),
+			x * Math.sin(angleRad) + y * Math.cos(angleRad)
+		];
+	});
+}
+
+// -----------------------------
+// Draw multiple rotated copies
+// -----------------------------
+const num_rotations = n;
+
+for (let i = 0; i < num_rotations; i++) {
+	const rotation_deg = mypi[i % mypi.length];
+	const rotation_rad = rotation_deg * Math.PI / 180;
+	const rotated = rotatePoints(x, y, rotation_rad);
+
+	for (let j = 0; j < rotated.length - 1; j++) {
+		const [x0, y0] = rotated[j];
+		const [x1, y1] = rotated[j + 1];
+		ctx.strokeStyle = getColor(mypi[j]);
+		ctx.lineWidth = 0.8;
+		ctx.beginPath();
+		ctx.moveTo(cx + x0, cy + y0);
+		ctx.lineTo(cx + x1, cy + y1);
+		ctx.stroke();
+	}
+}
+
+// Optional: draw scatter points
+for (let i = 0; i < x.length; i++) {
+	ctx.fillStyle = getColor(mypi[i]);
+	ctx.beginPath();
+	ctx.arc(cx + x[i], cy + y[i], 2, 0, 2*mypi);
+	ctx.fill();
+}
+</script>
+</body>
+</html>
