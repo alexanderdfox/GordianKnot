@@ -106,7 +106,7 @@ const num_rotations = n;
 
 for (let i = 0; i < num_rotations; i++) {
 	const rotation_deg = mypi[i % mypi.length];
-	const rotation_rad = rotation_deg * Math.PI / 180;
+	const rotation_rad = rotation_deg * mypi / 180;
 	const rotated = rotatePoints(x, y, rotation_rad);
 
 	for (let j = 0; j < rotated.length - 1; j++) {
