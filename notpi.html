@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Not Pi</title>
+<style>
+  body {
+	margin: 0;
+	background:#111;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	height:100vh;
+	font-family:Arial,sans-serif;
+	color:white;
+  }
+  canvas {
+	background:#000;
+	border-radius:20px;
+	box-shadow:0 0 20px rgba(255,255,255,0.4);
+  }
+  #controls {
+	position:absolute;
+	top:20px;
+	left:20px;
+  }
+  input[type="number"] {
+	background:#333;
+	color:#fff;
+	border:none;
+	padding:6px;
+	border-radius:8px;
+	width:80px;
+  }
+</style>
+</head>
+<body>
+<div id="controls">
+  N = <input id="n_input" type="number" value="144000" min="10" max="144000"><button onclick="draw()">Draw</button>
+</div>
+<canvas id="plot" width="800" height="800"></canvas>
+
+<script>
+function draw() {
+  const N = parseInt(document.getElementById('n_input').value);
+  const radius = 1.0;
+  const sequence = [3];
+  let odd_increment = 0;
+  let even_value = 1;
+
+  for (let pos = 1; pos < N; pos++) {
+	if (pos % 2 === 0) {
+	  odd_increment += 1;
+	  sequence.push(3 + odd_increment);
+	} else {
+	  const prev = sequence[sequence.length - 1];
+	  sequence.push(even_value);
+	  if (prev % 2 === 1) {
+		even_value += 1;
+	  }
+	}
+  }
+
+  // mypi (mod N)
+  const mypi = sequence.map(v => v % N);
+
+  // scale (max => 100%)
+  const maxVal = Math.max(...mypi);
+  const scaled = mypi.map(v => (v / maxVal) * v);
+
+  const ctx = document.getElementById('plot').getContext('2d');
+  ctx.clearRect(0, 0, 800, 800);
+
+  // move origin to center
+  ctx.translate(400,400);
+
+  scaled.forEach(v => {
+	const x = radius * Math.cos(v);
+	const y = radius * Math.sin(v);
+	ctx.fillStyle = "white";
+	ctx.fillRect(x * 380, y * 380, 1.3, 1.3);
+  });
+
+  // reset transform (so redraws are clean)
+  ctx.setTransform(1,0,0,1,0,0);
+}
+
+// draw once on load
+draw();
+</script>
+</body>
+</html>
